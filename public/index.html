@@ -54,7 +54,7 @@
     ////////////////////////////////////////////////
 
     function init() {
-
+       
       /* Note: 
       Though the conditional block below is not necessary, it is a best practice to avoid
       tampering with a cluttered namespace.
@@ -69,15 +69,38 @@
 
       // TODO: 
       // Exercise 4: Create a new WebSocket connection with the server using the ws protocol.
-      const URL = '??://localhost:' + PORT;
+      const URL = 'ws://localhost:' + PORT;
+      wsClient = new WebSocket(URL);
+      //console.log(wsClient, "wsClient")
 
 
       // TODO:
       // Exercise 5: Respond to connections by defining the .onopen event handler.
-
+      wsClient.onopen = (event)=>{
+        console.log("WebSocket connected")
+        const data = {
+          type: "NEW_USER"
+        }
+        wsClient.send(JSON.stringify(data));
+      }
 
       // TODO:
       // Exercise 7: Respond to messages from the servery by defining the .onmessage event handler
+      wsClient.onmessage =(messageEvent)=>{
+        const message = messageEvent.data;
+        //showMessageReceived(message)
+        const {type, payload} = JSON.parse(message);
+        switch(type){
+          case "NEW_USER":
+            showMessageReceived("<em>New user has joined</em>")
+            break;
+          case "NEW_MESSAGE":
+            showMessageReceived(payload.message)
+            break;
+          default:
+            break;
+        }
+      }
       // Exercise 9: Parse custom message types, formatting each message based on the type.
 
 
@@ -101,6 +124,7 @@
     }
 
     function sendMessageToServer(message) {
+       
       // Make sure the client is connected to the ws server
       if (!wsClient) {
         showMessageReceived('No WebSocket connection :(');
@@ -109,7 +133,14 @@
       
       // TODO: 
       // Exercise 6: Send the message from the messageBox to the server
+      
       // Exercise 9: Send the message in a custom message object with .type and .payload properties
+      const data = {
+        type: "NEW_MESSAGE", 
+        payload: {message: message}
+      }
+      wsClient.send(JSON.stringify(data));
+
     }
 
     ////////////////////////////////////////////////
